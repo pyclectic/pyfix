@@ -9,8 +9,8 @@ __author__ = "Alexander Metzner"
 import sys
 
 from pyfix import __version__
-from testcollector import TestCollector
-from testrunner import TestRunListener, TestRunner
+from .testcollector import TestCollector
+from .testrunner import TestRunListener, TestRunner
 
 def red (message):
     if sys.stdout.isatty():

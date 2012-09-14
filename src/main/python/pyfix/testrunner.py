@@ -42,7 +42,7 @@ class TestSuiteResult(object):
 
     @property
     def number_of_failures (self):
-        return reduce(lambda a, r: a + (0 if r.success else 1), self.test_results, 0)
+        return len([r for r in self.test_results if not r.success])
 
     @property
     def success (self):
