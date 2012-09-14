@@ -148,7 +148,7 @@ class TestExecutionInjectorTest (unittest.TestCase):
         test_definition = mock(TestDefinition)
         test_definition.givens = {"spam": "spam", "eggs": Spam}
 
-        assert_that(self.injector.provide_parameters(test_definition)).equals({"spam": "spam", "eggs": "eggs"})
+        assert_that(self.injector.provide_parameters(test_definition)).equals([{"spam": "spam", "eggs": "eggs"}])
 
 
     def test_ensure_that_fixture_value_is_reclaimed_when_test_finishes (self):

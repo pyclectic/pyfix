@@ -34,7 +34,8 @@ class TtyTestRunListener(TestRunListener):
             sys.stdout.write(green("passed"))
         else:
             sys.stdout.write(red("failed"))
-        sys.stdout.write(" [{0:d} ms]".format(test_result.execution_time))
+        sys.stdout.write(" [{0:d} ms] ({1:d} run{2})".format(test_result.execution_time, test_result.number_of_runs,
+            "s" if test_result.number_of_runs != 1 else ""))
         if not test_result.success:
             sys.stdout.write("\n\t{0}".format(test_result.message))
         sys.stdout.write("\n")
@@ -47,7 +48,8 @@ class TtyTestRunListener(TestRunListener):
     def after_suite (self, test_results):
         self._hr()
         print("TEST RESULTS SUMMARY")
-        print("\t{0:3d} tests executed".format(test_results.number_of_tests_executed))
+        print("\t{0:3d} tests executed in {1:d} ms".format(test_results.number_of_tests_executed,
+            test_results.execution_time))
         print("\t{0:3d} tests failed".format(test_results.number_of_failures))
 
     def _hr (self):
@@ -74,7 +76,6 @@ def main ():
     runner = TestRunner()
     runner.add_test_run_listener(TtyTestRunListener())
     test_suite_result = runner.run_tests(collector.test_suite)
-
 
     if test_suite_result.success:
         print(green("ALL TESTS PASSED"))

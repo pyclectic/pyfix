@@ -21,11 +21,12 @@ class TestRunListener(object):
 
 
 class TestResult(object):
-    def __init__ (self, test_definition, success, execution_time, message = None):
+    def __init__ (self, test_definition, success, execution_time, message, number_of_runs=1):
         self.test_definition = test_definition
         self.success = success
         self.execution_time = execution_time
         self.message = message
+        self.number_of_runs = number_of_runs
 
 
 class TestSuiteResult(object):
@@ -59,11 +60,11 @@ class TestExecutionInjector (object):
         for given in test_definition.givens:
             parameters[given] = self.resolve_parameter_value(test_definition.givens[given])
 
-        return parameters
+        return [parameters]
 
     def reclaim_parameters (self, test_definition, parameters):
         for given in test_definition.givens:
-            self.reclaim_parameter_value(test_definition.givens[given], parameters[given])
+            self.reclaim_parameter_value(test_definition.givens[given], parameters[0][given])
 
     def reclaim_parameter_value (self, given_value, parameter_value):
         if inspect.isclass(given_value):
@@ -100,7 +101,7 @@ class TestRunner(object):
             test_suite_result.add_test_result(self.run_test(test_definition))
 
         end = time.time()
-        test_suite_result.execution_time = int((end - start) / 1000)
+        test_suite_result.execution_time = int((end - start) * 1000)
 
         self._notify_listeners(lambda l: l.after_suite(test_suite_result))
 
@@ -116,7 +117,8 @@ class TestRunner(object):
 
         parameters = self._injector.provide_parameters(test_definition)
         try:
-            test_definition.function(**parameters)
+            for p in parameters:
+                test_definition.function(**p)
         except:
             message = sys.exc_info()[1]
             success = False
@@ -124,7 +126,7 @@ class TestRunner(object):
             self._injector.reclaim_parameters(test_definition, parameters)
 
         end = time.time()
-        test_result = TestResult(test_definition, success, int((end - start) / 1000), message)
+        test_result = TestResult(test_definition, success, int((end - start) * 1000), message)
 
         self._notify_listeners(lambda l: l.after_test(test_result))
         return test_result
