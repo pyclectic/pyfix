@@ -127,3 +127,6 @@ if __name__ == "__main__":
 ## Release Notes
 ### Version 0.1.1 released 2012-09-14
 * Inital release
+
+## License
+pyfix is published under the terms of the [Apache License, Version 2](http://www.apache.org/licenses/LICENSE-2.0.html).
