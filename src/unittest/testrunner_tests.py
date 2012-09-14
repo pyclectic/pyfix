@@ -13,6 +13,7 @@ class TestRunnerNotificationTest(unittest.TestCase):
         self.test_runner = TestRunner()
         self.listener_mock = mock(TestRunListener)
         self.test_definition_mock = mock(TestDefinition)
+        self.test_definition_mock.givens = {}
         self.test_runner.add_test_run_listener(self.listener_mock)
         self.suite = [self.test_definition_mock]
 
@@ -147,4 +148,23 @@ class TestExecutionInjectorTest (unittest.TestCase):
         test_definition = mock(TestDefinition)
         test_definition.givens = {"spam": "spam", "eggs": Spam}
 
-        assert_that(self.injector.inject_parameters(test_definition)).equals({"spam": "spam", "eggs": "eggs"})
+        assert_that(self.injector.provide_parameters(test_definition)).equals({"spam": "spam", "eggs": "eggs"})
+
+
+    def test_ensure_that_fixture_value_is_reclaimed_when_test_finishes (self):
+        class TestFixture (Fixture):
+            executed = False
+            def reclaim (self, value):
+                assert_that(value).equals("spam")
+                TestFixture.executed = True
+
+            def provide (self):
+                return "spam"
+
+        test_definition = mock(TestDefinition)
+        test_definition.givens = {"spam": TestFixture}
+
+        parameters = self.injector.provide_parameters(test_definition)
+        self.injector.reclaim_parameters(test_definition, parameters)
+
+        assert_that(TestFixture.executed).is_true()
