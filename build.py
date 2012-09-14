@@ -15,7 +15,7 @@ frameworks suffer from (i.e. putting self in front of almost everything).
 
 Links
 `````
-* pyfix Github repository <https://github.com/halimath/pyfix>
+* pyfix Github repository <https://github.com/pyclectic/pyfix>
 """
 
 from pythonbuilder.core import init, use_plugin, Author
@@ -37,7 +37,7 @@ version = "0.1.2"
 summary = "A framework for writing automated software tests (non xUnit based)"
 description = __doc__
 authors = (Author("Alexander Metzner", "halimath.wilanthaou@gmail.com"),)
-url = "https://github.com/halimath/pyfix"
+url = "https://github.com/pyclectic/pyfix"
 license = "Apache Software License"
 
 @init
