@@ -1,7 +1,10 @@
 __author__ = "Alexander Metzner"
 
-import time
+import inspect
 import sys
+import time
+
+from .fixture import Fixture
 
 class TestRunListener(object):
     def before_suite (self, test_definitions):
@@ -49,8 +52,28 @@ class TestSuiteResult(object):
         return True
 
 
+class TestExecutionInjector (object):
+    def inject_parameters (self, test_definition):
+        parameters = {}
+
+        for given in test_definition.givens:
+            parameters[given] = self.resolve_parameter_value(test_definition.givens[given])
+
+        return parameters
+
+    def resolve_parameter_value (self, given_value):
+        if inspect.isclass(given_value):
+            given_value = given_value()
+
+        if isinstance(given_value, Fixture):
+            given_value = given_value.provide()
+
+        return given_value
+
+
 class TestRunner(object):
     def __init__ (self):
+        self._injector = TestExecutionInjector()
         self._listeners = []
 
     def add_test_run_listener (self, test_run_listener):
@@ -79,9 +102,8 @@ class TestRunner(object):
         message = None
         success = True
 
-        # TODO: Externalize this
         try:
-            test_definition.function()
+            test_definition.function(**self._injector.inject_parameters(test_definition))
         except:
             message = sys.exc_info()[1]
             success = False

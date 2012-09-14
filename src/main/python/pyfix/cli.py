@@ -1,3 +1,7 @@
+"""
+This module provides classes and functions that make up the command line interface of pyfix.
+"""
+
 from __future__ import print_function
 
 __author__ = "Alexander Metzner"
@@ -37,7 +41,7 @@ class TtyTestRunListener(TestRunListener):
 
     def before_suite (self, test_definitions):
         number_of_tests = len(test_definitions)
-        print("Running {0} test{1}.".format(green(number_of_tests), "s" if number_of_tests else ""))
+        print("Running {0} test{1}.".format(number_of_tests, "s" if number_of_tests else ""))
         self._hr()
 
     def after_suite (self, test_results):
@@ -56,6 +60,10 @@ def banner ():
 
 
 def main ():
+    """
+    Main cli function. Executes all tests defined in the __main__ module and issues all reports to STDOUT using
+    tty coloring if supported by STDOUT.
+    """
     banner()
 
     import __main__

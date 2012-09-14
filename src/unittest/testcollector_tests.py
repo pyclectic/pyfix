@@ -4,25 +4,8 @@ import unittest
 from mockito import mock
 from pyassert import assert_that
 
-from pyfix.testcollector import test, TEST_ATTRIBUTE, TestCollector, TestDefinition
-
-class TestDecoratorTest(unittest.TestCase):
-    def test_should_mark_function_as_test (self):
-        @test
-        def some_test ():
-            pass
-
-        assert_that(hasattr(some_test, TEST_ATTRIBUTE)).is_true()
-
-    def test_ensure_that_decorated_function_can_be_called (self):
-        @test
-        def some_test ():
-            some_test.called = True
-
-        some_test.called = False
-        some_test()
-        assert_that(some_test.called).is_true()
-
+from pyfix.decorators import test, given
+from pyfix.testcollector import TestCollector
 
 class TestCollectorTest(unittest.TestCase):
     def setUp (self):

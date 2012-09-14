@@ -5,7 +5,8 @@ from pyassert import assert_that
 from mockito import mock, when, verify, any as any_value
 
 from pyfix.testdefinition import TestDefinition
-from pyfix.testrunner import TestRunner, TestRunListener, TestResult, TestSuiteResult
+from pyfix.fixture import Fixture
+from pyfix.testrunner import TestRunner, TestRunListener, TestResult, TestSuiteResult, TestExecutionInjector
 
 class TestRunnerNotificationTest(unittest.TestCase):
     def setUp (self):
@@ -32,6 +33,41 @@ class TestRunnerNotificationTest(unittest.TestCase):
         verify(self.listener_mock).after_suite(any_value(TestSuiteResult))
 
 
+class TestRunnerExecutionTest(unittest.TestCase):
+    def setUp(self):
+        self.test_runner = TestRunner()
+
+    def test_should_execute_test_function_when_running_test (self):
+        def test ():
+            test.executed = True
+        test.executed = False
+
+        self.test_runner.run_test(TestDefinition.from_function(test))
+
+        assert_that(test.executed).is_true()
+
+    def test_ensure_that_execution_is_marked_as_successful_when_test_terminated_normally (self):
+        def test ():
+            pass
+        test_result = self.test_runner.run_test(TestDefinition.from_function(test))
+
+        assert_that(test_result.success).is_true()
+
+    def test_ensure_that_execution_is_marked_as_failed_when_test_terminated_normally (self):
+        def test ():
+            raise Exception("caboom")
+        test_result = self.test_runner.run_test(TestDefinition.from_function(test))
+
+        assert_that(test_result.success).is_false()
+
+    def test_ensure_that_non_negative_time_is_recorded_for_test (self):
+        def test ():
+            pass
+        test_result = self.test_runner.run_test(TestDefinition.from_function(test))
+
+        assert_that(test_result.execution_time).equals(0)
+
+
 class TestSuiteResultsTest (unittest.TestCase):
     def setUp (self):
         self.test_suite = TestSuiteResult()
@@ -52,3 +88,63 @@ class TestSuiteResultsTest (unittest.TestCase):
         self.test_suite.add_test_result(result)
 
         assert_that(self.test_suite.success).is_false()
+
+    def test_should_count_number_of_tests_executed (self):
+        failure = mock(TestResult)
+        failure.success = False
+
+        success = mock(TestResult)
+        success.success = True
+
+        self.test_suite.add_test_result(failure)
+        self.test_suite.add_test_result(success)
+        self.test_suite.add_test_result(success)
+        self.test_suite.add_test_result(failure)
+
+        assert_that(self.test_suite.number_of_tests_executed).equals(4)
+
+    def test_should_count_number_of_failures (self):
+        failure = mock(TestResult)
+        failure.success = False
+
+        success = mock(TestResult)
+        success.success = True
+
+        self.test_suite.add_test_result(failure)
+        self.test_suite.add_test_result(success)
+        self.test_suite.add_test_result(success)
+        self.test_suite.add_test_result(failure)
+
+        assert_that(self.test_suite.number_of_failures).equals(2)
+
+
+
+class TestExecutionInjectorTest (unittest.TestCase):
+    def setUp (self):
+        self.injector = TestExecutionInjector()
+
+    def test_should_return_object_when_given_value_is_object (self):
+        value = "spam"
+        assert_that(self.injector.resolve_parameter_value(value)).is_identical_to(value)
+
+    def test_should_return_instance_when_given_value_is_class (self):
+        class Spam:
+            pass
+        assert_that(isinstance(self.injector.resolve_parameter_value(Spam), Spam)).is_true()
+
+    def test_should_return_provided_value_when_given_value_is_fixture_class (self):
+        class Spam (Fixture):
+            def provide (self):
+                return "eggs"
+
+        assert_that(self.injector.resolve_parameter_value(Spam)).equals("eggs")
+
+    def test_should_inject_parameters (self):
+        class Spam (Fixture):
+            def provide (self):
+                return "eggs"
+
+        test_definition = mock(TestDefinition)
+        test_definition.givens = {"spam": "spam", "eggs": Spam}
+
+        assert_that(self.injector.inject_parameters(test_definition)).equals({"spam": "spam", "eggs": "eggs"})

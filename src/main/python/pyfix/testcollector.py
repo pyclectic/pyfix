@@ -1,13 +1,7 @@
 __author__ = "Alexander Metzner"
 
+from .decorators import TEST_ATTRIBUTE
 from .testdefinition import TestDefinition
-
-TEST_ATTRIBUTE = "PYFIX_TEST"
-
-def test (function):
-    setattr(function, TEST_ATTRIBUTE, True)
-    return function
-
 
 class TestCollector(object):
     def __init__ (self):

@@ -3,9 +3,22 @@ __author__ = "Alexander Metzner"
 import unittest
 from pyassert import assert_that
 
+from pyfix.decorators import GIVEN_ATTRIBUTE
 from pyfix.testdefinition import TestDefinition
 
+
 class TestTest(unittest.TestCase):
+    def test_should_handle_givens (self):
+        def some_function ():
+            pass
+
+        givens = {"spam": "spam"}
+        setattr(some_function, GIVEN_ATTRIBUTE, givens)
+
+        test = TestDefinition.from_function(some_function)
+
+        assert_that(test.givens).equals(givens)
+
     def test_should_construct_test_from_function_with_underscore_name (self):
         def some_function ():
             "This is my description"
