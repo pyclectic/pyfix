@@ -1,0 +1,10 @@
+*.pyc
+target
+.coverage
+user
+.project
+.pydevproject
+.idea
+*.iml
+ve*
+
