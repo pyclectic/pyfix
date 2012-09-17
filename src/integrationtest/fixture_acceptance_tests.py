@@ -1,6 +1,6 @@
 __author__ = "Alexander Metzner"
 
-from pyfix import test, main, given, Fixture
+from pyfix import test, run_tests, given, Fixture
 from pyassert import assert_that
 
 class Accumulator(object):
@@ -30,4 +30,4 @@ def ensure_that_adding_two_to_two_yields_four (accumulator):
     assert_that(accumulator.sum).equals(4)
 
 if __name__ == "__main__":
-    main()
+    run_tests()

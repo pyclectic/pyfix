@@ -61,7 +61,7 @@ def banner ():
     print()
 
 
-def main ():
+def run_tests ():
     """
     Main cli function. Executes all tests defined in the __main__ module and issues all reports to STDOUT using
     tty coloring if supported by STDOUT.
