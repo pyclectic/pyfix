@@ -5,7 +5,7 @@ import inspect
 import sys
 import time
 
-from fixture import Fixture, ConstantFixture
+from .fixture import Fixture, ConstantFixture
 
 class TestRunListener(object):
     def before_suite (self, test_definitions):
