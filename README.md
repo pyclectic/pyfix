@@ -39,7 +39,7 @@ def ensure_that_two_plus_three_equals_five ():
     assert_that(2 + 3).equals(5)
 
 if __name__ == "__main__":
-    run_test()
+    run_tests()
 ```
 
 If you execute this file you should see the following output:
@@ -63,7 +63,7 @@ ALL TESTS PASSED
 One of the main strengths of pyfix is the ability to inject parameters to tests. See this example:
 
 ```python
-from pyfix import test, run_test, given
+from pyfix import test, run_tests, given
 from pyassert import assert_that
 
 class Accumulator(object):
@@ -82,7 +82,7 @@ def ensure_that_adding_two_yields_two (accumulator):
 
 
 if __name__ == "__main__":
-    run_test()
+    run_tests()
 
 ```
 
@@ -121,7 +121,7 @@ def ensure_that_adding_two_to_two_yields_four (accumulator):
     assert_that(accumulator.sum).equals(4)
 
 if __name__ == "__main__":
-    run_test()
+    run_tests()
 ```
 
 ## Release Notes
