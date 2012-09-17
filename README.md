@@ -27,7 +27,7 @@ use of [pyassert](https://github.com/halimath/pyassert) is not mandatory althoug
 easy to read tests).
 
 ```python
-from pyfix import test, main
+from pyfix import test, run_tests
 from pyassert import assert_that
 
 @test
@@ -39,7 +39,7 @@ def ensure_that_two_plus_three_equals_five ():
     assert_that(2 + 3).equals(5)
 
 if __name__ == "__main__":
-    main()
+    run_test()
 ```
 
 If you execute this file you should see the following output:
@@ -63,7 +63,7 @@ ALL TESTS PASSED
 One of the main strengths of pyfix is the ability to inject parameters to tests. See this example:
 
 ```python
-from pyfix import test, main, given
+from pyfix import test, run_test, given
 from pyassert import assert_that
 
 class Accumulator(object):
@@ -82,7 +82,7 @@ def ensure_that_adding_two_yields_two (accumulator):
 
 
 if __name__ == "__main__":
-    main()
+    run_test()
 
 ```
 
@@ -93,7 +93,7 @@ If you want to do some complex initialization and/ or clean up stuff, pyfix prov
 defines hooks for these lifecycle phases.
 
 ```python
-from pyfix import test, main, given, Fixture
+from pyfix import test, run_test, given, Fixture
 from pyassert import assert_that
 
 class Accumulator(object):
@@ -121,10 +121,13 @@ def ensure_that_adding_two_to_two_yields_four (accumulator):
     assert_that(accumulator.sum).equals(4)
 
 if __name__ == "__main__":
-    main()
+    run_test()
 ```
 
 ## Release Notes
+### Version 0.1.2 released 2012-09-17
+* Renamed main to run_tests
+
 ### Version 0.1.1 released 2012-09-14
 * Inital release
 
