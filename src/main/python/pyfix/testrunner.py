@@ -1,10 +1,11 @@
 __author__ = "Alexander Metzner"
 
+import copy
 import inspect
 import sys
 import time
 
-from .fixture import Fixture, ConstantFixture
+from fixture import Fixture, ConstantFixture
 
 class TestRunListener(object):
     def before_suite (self, test_definitions):
@@ -58,13 +59,37 @@ class TestInjector (object):
 
         fixtures = self._resolve_fixtures(test_definition)
 
-        parameters = dict((name, fixtures[name][1]) for name in fixtures)
+        parameter_sets = self._multiply_parameter_maps(fixtures)
 
-        results.append(self._execute_test_once(test_definition, parameters))
+        for parameters in parameter_sets:
+            results.append(self._execute_test_once(test_definition, parameters))
 
-        for name, (fixture, value) in fixtures.items():
-            fixture.reclaim(value)
+        for name, (fixture, values) in fixtures.items():
+            for value in values:
+                fixture.reclaim(value)
 
+        return results
+
+    def _multiply_parameter_maps (self, fixtures):
+
+        results = None
+
+        for name, (fixture, values) in fixtures.items():
+            if results is None:
+                results = []
+                for value in values:
+                    results.append({name: value})
+            else:
+                new_results = []
+                for result in results:
+                    for value in values:
+                        result = copy.deepcopy(result)
+                        result[name] = value
+                        new_results.append(result)
+                results = new_results
+
+        if results is None:
+            results = [{}]
         return results
 
     def _resolve_fixtures (self, test_definition):

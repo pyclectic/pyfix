@@ -5,7 +5,7 @@ from pyassert import assert_that
 from mockito import mock, when, verify, any as any_value
 
 from pyfix.testdefinition import TestDefinition
-from pyfix.fixture import Fixture
+from pyfix.fixture import Fixture, enumerate
 from pyfix.testrunner import TestRunner, TestRunListener, TestResult, TestSuiteResult, TestInjector
 
 class TestRunnerNotificationTest(unittest.TestCase):
@@ -165,7 +165,7 @@ class TestInjectorTest (unittest.TestCase):
 
             def provide(self):
                 TestFixture.provide_invoced = True
-                return "spam"
+                return ["spam"]
 
             def reclaim(self, value):
                 TestFixture.reclaim_invoced = True
@@ -181,3 +181,45 @@ class TestInjectorTest (unittest.TestCase):
 
         assert_that(TestFixture.provide_invoced).is_true()
         assert_that(TestFixture.reclaim_invoced).is_true()
+
+    def test_should_invoke_test_function_twice_when_fixture_provides_two_values (self):
+        function = InvocationCountingFunctionMock()
+        test_definition = TestDefinition(function, "unittest", "unittest", "module", {"spam": enumerate("spam", "eggs")})
+
+        self.injector.execute_test(test_definition)
+
+        assert_that(function.invocation_counter).equals(2)
+
+    def test_should_reclaim_all_values_when_fixture_returns_more_than_one_value (self):
+        class TestFixture (Fixture):
+            provide_invoced = 0
+            reclaim_invoced = 0
+
+            def provide(self):
+                TestFixture.provide_invoced += 1
+                return ["spam", "eggs"]
+
+            def reclaim(self, value):
+                TestFixture.reclaim_invoced += 1
+
+        function = InvocationCountingFunctionMock()
+        test_definition = TestDefinition(function, "unittest", "unittest", "module", {"spam": TestFixture})
+
+        self.injector.execute_test(test_definition)
+
+        assert_that(TestFixture.provide_invoced).equals(1)
+        assert_that(TestFixture.reclaim_invoced).equals(2)
+
+    def test_should_invoke_test_function_four_times_when_two_fixtures_each_provide_two_values (self):
+        function = InvocationCountingFunctionMock()
+        test_definition = TestDefinition(function, "unittest", "unittest", "module",
+                {"spam": enumerate("spam", "eggs"),
+                 "foo": enumerate("foo", "bar")})
+
+        self.injector.execute_test(test_definition)
+
+        assert_that(function.invocation_counter).equals(4)
+        assert_that(function.invocation_arguments).contains({"spam": "spam", "foo": "foo"})
+        assert_that(function.invocation_arguments).contains({"spam": "spam", "foo": "bar"})
+        assert_that(function.invocation_arguments).contains({"spam": "eggs", "foo": "foo"})
+        assert_that(function.invocation_arguments).contains({"spam": "eggs", "foo": "bar"})

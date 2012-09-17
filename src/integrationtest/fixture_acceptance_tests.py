@@ -14,7 +14,7 @@ class InitializedAccumulator (Fixture):
     def provide (self):
         result = Accumulator()
         result.add(2)
-        return result
+        return [result]
 
 @test
 @given(accumulator=Accumulator)
