@@ -15,7 +15,7 @@ and even acceptance tests) although the primary targets are more technical tests
 ## How to install it?
 
 pyfix is available via the [Cheeseshop](http://pypi.python.org/pypi/pyfix/) so you can use ```easy_install``` or
-```pip```:
+```pip```
 
 ```bash
 $ pip install pyfix
