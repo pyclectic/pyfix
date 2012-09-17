@@ -14,8 +14,8 @@ and even acceptance tests) although the primary targets are more technical tests
 
 ## How to install it?
 
-pyfix is available via the [Cheeseshop](http://pypi.python.org/pypi/pyfix/) so you can use ```easy_install``` or
-```pip```
+pyfix is available via the [Cheeseshop](http://pypi.python.org/pypi/pyfix/) so you can use `easy_install` or
+`pip`:
 
 ```bash
 $ pip install pyfix
@@ -87,10 +87,10 @@ if __name__ == "__main__":
 
 ```
 
-pyfix will instantiate an ```Accumulator``` for you and *inject* it using the accumulator parameter. Note that there is
-nothing special about the ```Accumulator```; it's a plain Python class.
+pyfix will instantiate an `Accumulator` for you and *inject* it using the accumulator parameter. Note that there is
+nothing special about the `Accumulator`; it's a plain Python class.
 
-If you want to do some complex initialization and/ or clean up stuff, pyfix provides the ```Fixture``` interface which
+If you want to do some complex initialization and/ or clean up stuff, pyfix provides the `Fixture` interface which
 defines hooks for these lifecycle phases.
 
 ```python
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
 ## Release Notes
 ### Version 0.1.2 released 2012-09-17
-* Renamed ```main``` to ```run_tests```
+* Renamed `main` to `run_tests`
 
 ### Version 0.1.1 released 2012-09-14
 * Inital release
