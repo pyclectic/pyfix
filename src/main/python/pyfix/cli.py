@@ -29,15 +29,16 @@ class TtyTestRunListener(TestRunListener):
         sys.stdout.write("{0}: ".format(test_definition.name))
         sys.stdout.flush()
 
-    def after_test (self, test_result):
-        if test_result.success:
-            sys.stdout.write(green("passed"))
-        else:
-            sys.stdout.write(red("failed"))
-        sys.stdout.write(" [{0:d} ms] ({1:d} run{2})".format(test_result.execution_time, test_result.number_of_runs,
-            "s" if test_result.number_of_runs != 1 else ""))
-        if not test_result.success:
-            sys.stdout.write("\n\t{0}".format(test_result.message))
+    def after_test (self, test_results):
+        for test_result in test_results:
+            sys.stdout.write("\n\t")
+            if test_result.success:
+                sys.stdout.write(green("passed"))
+            else:
+                sys.stdout.write(red("failed"))
+            sys.stdout.write(" [{0:d} ms]".format(test_result.execution_time))
+            if not test_result.success:
+                sys.stdout.write("\n\t{0}".format(test_result.message))
         sys.stdout.write("\n")
 
     def before_suite (self, test_definitions):

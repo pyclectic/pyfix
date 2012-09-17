@@ -4,7 +4,7 @@ import inspect
 import sys
 import time
 
-from .fixture import Fixture
+from .fixture import Fixture, ConstantFixture
 
 class TestRunListener(object):
     def before_suite (self, test_definitions):
@@ -13,7 +13,7 @@ class TestRunListener(object):
     def before_test (self, test_definition):
         pass
 
-    def after_test (self, test_result):
+    def after_test (self, test_results):
         pass
 
     def after_suite (self, test_results):
@@ -21,12 +21,11 @@ class TestRunListener(object):
 
 
 class TestResult(object):
-    def __init__ (self, test_definition, success, execution_time, message, number_of_runs=1):
+    def __init__ (self, test_definition, success, execution_time, message):
         self.test_definition = test_definition
         self.success = success
         self.execution_time = execution_time
         self.message = message
-        self.number_of_runs = number_of_runs
 
 
 class TestSuiteResult(object):
@@ -34,8 +33,8 @@ class TestSuiteResult(object):
         self.test_results = []
         self.execution_time = -1
 
-    def add_test_result (self, test_result):
-        self.test_results.append(test_result)
+    def add_test_results (self, test_results):
+        self.test_results += [r for r in test_results]
 
     @property
     def number_of_tests_executed (self):
@@ -53,39 +52,56 @@ class TestSuiteResult(object):
         return True
 
 
-class TestExecutionInjector (object):
-    def provide_parameters (self, test_definition):
-        parameters = {}
+class TestInjector (object):
+    def execute_test (self, test_definition):
+        results = []
 
-        for given in test_definition.givens:
-            parameters[given] = self.resolve_parameter_value(test_definition.givens[given])
+        fixtures = self._resolve_fixtures(test_definition)
 
-        return [parameters]
+        parameters = dict((name, fixtures[name][1]) for name in fixtures)
 
-    def reclaim_parameters (self, test_definition, parameters):
-        for given in test_definition.givens:
-            self.reclaim_parameter_value(test_definition.givens[given], parameters[0][given])
+        results.append(self._execute_test_once(test_definition, parameters))
 
-    def reclaim_parameter_value (self, given_value, parameter_value):
+        for name, (fixture, value) in fixtures.items():
+            fixture.reclaim(value)
+
+        return results
+
+    def _resolve_fixtures (self, test_definition):
+        result = {}
+        for name, value in test_definition.givens.items():
+            result[name] = self._resolve_fixture_and_values(value)
+        return result
+
+    def _resolve_fixture_and_values (self, given_value):
         if inspect.isclass(given_value):
             given_value = given_value()
 
-        if isinstance(given_value, Fixture):
-            given_value.reclaim(parameter_value)
+        if not isinstance(given_value, Fixture):
+            given_value = ConstantFixture(given_value)
 
-    def resolve_parameter_value (self, given_value):
-        if inspect.isclass(given_value):
-            given_value = given_value()
+        return (given_value, given_value.provide())
 
-        if isinstance(given_value, Fixture):
-            given_value = given_value.provide()
+    def _execute_test_once (self, test_definition, parameters):
+        start = time.time()
 
-        return given_value
+        message = None
+        success = True
+
+        try:
+            test_definition.function(**parameters)
+        except:
+            message = str(sys.exc_info()[1])
+            success = False
+
+        end = time.time()
+
+        return TestResult(test_definition, success, int((end - start) * 1000), message)
 
 
 class TestRunner(object):
     def __init__ (self):
-        self._injector = TestExecutionInjector()
+        self._injector = TestInjector()
         self._listeners = []
 
     def add_test_run_listener (self, test_run_listener):
@@ -98,7 +114,7 @@ class TestRunner(object):
         start = time.time()
 
         for test_definition in test_definitions:
-            test_suite_result.add_test_result(self.run_test(test_definition))
+            test_suite_result.add_test_results(self.run_test(test_definition))
 
         end = time.time()
         test_suite_result.execution_time = int((end - start) * 1000)
@@ -110,26 +126,10 @@ class TestRunner(object):
     def run_test (self, test_definition):
         self._notify_listeners(lambda l: l.before_test(test_definition))
 
-        start = time.time()
+        test_results = self._injector.execute_test(test_definition)
 
-        message = None
-        success = True
-
-        parameters = self._injector.provide_parameters(test_definition)
-        try:
-            for p in parameters:
-                test_definition.function(**p)
-        except:
-            message = sys.exc_info()[1]
-            success = False
-        finally:
-            self._injector.reclaim_parameters(test_definition, parameters)
-
-        end = time.time()
-        test_result = TestResult(test_definition, success, int((end - start) * 1000), message)
-
-        self._notify_listeners(lambda l: l.after_test(test_result))
-        return test_result
+        self._notify_listeners(lambda l: l.after_test(test_results))
+        return test_results
 
 
     def _notify_listeners (self, callback):

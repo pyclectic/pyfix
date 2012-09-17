@@ -10,7 +10,6 @@ class Accumulator(object):
     def add (self, number=1):
         self.sum += number
 
-
 class InitializedAccumulator (Fixture):
     def provide (self):
         result = Accumulator()
