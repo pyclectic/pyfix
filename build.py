@@ -33,7 +33,7 @@ use_plugin("python.install_dependencies")
 
 default_task = ["analyze", "publish"]
 
-version = "0.1.2"
+version = "0.1.3"
 summary = "A framework for writing automated software tests (non xUnit based)"
 description = __doc__
 authors = (Author("Alexander Metzner", "halimath.wilanthaou@gmail.com"),)

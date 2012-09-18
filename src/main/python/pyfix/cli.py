@@ -40,7 +40,7 @@ class TtyTestRunListener(TestRunListener):
                 sys.stdout.write(red("failed"))
             sys.stdout.write(" [{0:d} ms]".format(test_result.execution_time))
             if not test_result.success:
-                sys.stdout.write("\n\t{0}".format(test_result.message))
+                sys.stdout.write(" {0}".format(test_result.message))
         sys.stdout.write("\n")
 
     def before_suite (self, test_definitions):
