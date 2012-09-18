@@ -83,7 +83,6 @@ def ensure_that_adding_two_yields_two (accumulator):
 
 if __name__ == "__main__":
     run_tests()
-
 ```
 
 pyfix will instantiate an `Accumulator` for you and *inject* it using the accumulator parameter. Note that there is
@@ -92,8 +91,7 @@ nothing special about the `Accumulator`; it's a plain Python class.
 If you want to do some complex initialization and/ or clean up stuff, pyfix provides the `Fixture` interface which
 defines hooks for these lifecycle phases.
 
-```python
-from pyfix import test, run_test, given, Fixture
+from pyfix import test, run_tests, given, Fixture
 from pyassert import assert_that
 
 class Accumulator(object):
@@ -108,10 +106,7 @@ class InitializedAccumulator (Fixture):
     def provide (self):
         result = Accumulator()
         result.add(2)
-        return result
-
-    def reclaim (self, value):
-        # Nothing to do here; just to demonstrate the method
+        return [result]
 
 
 @test
@@ -119,6 +114,7 @@ class InitializedAccumulator (Fixture):
 def ensure_that_adding_two_to_two_yields_four (accumulator):
     accumulator.add(2)
     assert_that(accumulator.sum).equals(4)
+
 
 if __name__ == "__main__":
     run_tests()

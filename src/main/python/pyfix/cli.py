@@ -32,6 +32,8 @@ class TtyTestRunListener(TestRunListener):
     def after_test (self, test_results):
         for test_result in test_results:
             sys.stdout.write("\n\t")
+            if test_result.parameter_description:
+                sys.stdout.write("{0}: ".format(test_result.parameter_description))
             if test_result.success:
                 sys.stdout.write(green("passed"))
             else:

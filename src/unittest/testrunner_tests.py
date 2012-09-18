@@ -130,6 +130,7 @@ class TestInjectorTest (unittest.TestCase):
         actual = self.injector.execute_test(test_definition)
 
         assert_that(actual[0].success).is_true()
+        assert_that(actual[0].parameter_description).equals("")
 
     def test_ensure_that_test_is_marked_as_failing_when_being_executed_with_exception (self):
         function = InvocationCountingFunctionMock(AssertionError("Caboom"))
@@ -153,22 +154,23 @@ class TestInjectorTest (unittest.TestCase):
         function = InvocationCountingFunctionMock()
         test_definition = TestDefinition(function, "unittest", "unittest", "module", {"spam": "eggs"})
 
-        self.injector.execute_test(test_definition)
+        result = self.injector.execute_test(test_definition)
 
         assert_that(function.invocation_counter).equals(1)
         assert_that(function.invocation_arguments[0]).equals({"spam": "eggs"})
+        assert_that(result[0].parameter_description).equals("spam=eggs")
 
     def test_should_invoke_test_function_once_when_fixture_is_given_and_provide_and_reclaim_are_called (self):
         class TestFixture (Fixture):
-            provide_invoced = False
-            reclaim_invoced = False
+            provide_invoked = False
+            reclaim_invoked = False
 
             def provide(self):
-                TestFixture.provide_invoced = True
+                TestFixture.provide_invoked = True
                 return ["spam"]
 
             def reclaim(self, value):
-                TestFixture.reclaim_invoced = True
+                TestFixture.reclaim_invoked = True
                 assert_that(value).equals("spam")
 
         function = InvocationCountingFunctionMock()
@@ -179,8 +181,8 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(function.invocation_counter).equals(1)
         assert_that(function.invocation_arguments[0]).equals({"spam": "spam"})
 
-        assert_that(TestFixture.provide_invoced).is_true()
-        assert_that(TestFixture.reclaim_invoced).is_true()
+        assert_that(TestFixture.provide_invoked).is_true()
+        assert_that(TestFixture.reclaim_invoked).is_true()
 
     def test_should_invoke_test_function_twice_when_fixture_provides_two_values (self):
         function = InvocationCountingFunctionMock()
@@ -192,23 +194,23 @@ class TestInjectorTest (unittest.TestCase):
 
     def test_should_reclaim_all_values_when_fixture_returns_more_than_one_value (self):
         class TestFixture (Fixture):
-            provide_invoced = 0
-            reclaim_invoced = 0
+            provide_invoked = 0
+            reclaim_invoked = 0
 
             def provide(self):
-                TestFixture.provide_invoced += 1
+                TestFixture.provide_invoked += 1
                 return ["spam", "eggs"]
 
             def reclaim(self, value):
-                TestFixture.reclaim_invoced += 1
+                TestFixture.reclaim_invoked += 1
 
         function = InvocationCountingFunctionMock()
         test_definition = TestDefinition(function, "unittest", "unittest", "module", {"spam": TestFixture})
 
         self.injector.execute_test(test_definition)
 
-        assert_that(TestFixture.provide_invoced).equals(1)
-        assert_that(TestFixture.reclaim_invoced).equals(2)
+        assert_that(TestFixture.provide_invoked).equals(1)
+        assert_that(TestFixture.reclaim_invoked).equals(2)
 
     def test_should_invoke_test_function_four_times_when_two_fixtures_each_provide_two_values (self):
         function = InvocationCountingFunctionMock()
