@@ -126,7 +126,7 @@ class TestInjector(object):
 
     def _build_parameter_description (self, fixtures, parameters):
         result_list = []
-        for name in sorted(fixtures.iterkeys()):
+        for name in sorted(fixtures.keys()):
             result_list.append("{0}={1}".format(name, fixtures[name][0].describe(parameters[name])))
 
         return " ".join(result_list)
