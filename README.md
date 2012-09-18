@@ -45,7 +45,7 @@ if __name__ == "__main__":
 If you execute this file you should see the following output:
 
 ```
-pyfix version 0.1.1.
+pyfix version 0.1.3.
 
 Running 2 tests.
 --------------------------------------------------------------------------------
@@ -121,7 +121,63 @@ if __name__ == "__main__":
     run_tests()
 ```
 
+### Parameterized Tests: Providing more than one Value
+
+As you might have noticed in the last example, the `provide` method from the `Fixture` returned a list and not
+just a single value. Every fixture can return more than one value. *pyfix* will use all values provided by all
+fixtures and calculate all valid permutations of parameter values and then invoke a single test method for each
+permutation. Using this feature it is easy to write parameterized tests.
+
+The simplest variant of a parameterized test is a test accepting one parameter that we provide a set of values for.
+*pyfix* provides the `enumerate` utility function to let you write such a test in an easy way:
+
+```python
+from pyfix import test, run_tests, given, enumerate
+from pyassert import assert_that
+
+KNOWN_PRIMES = [2, 3, 5, 7, 11, 13, 17, 19]
+
+def is_prime(number):
+    return number in KNOWN_PRIMES
+
+
+@test
+@given(number=enumerate(2, 3, 5, 7, 11))
+def is_prime_should_return_true_when_prime_is_given(number):
+    assert_that(is_prime(number)).is_true()
+
+
+if __name__ == "__main__":
+    run_tests()
+```
+
+Please notice that this example is intended to demonstrate the test and not the implementation of `is_prime` which
+indeed is brain dead.
+
+If you run this module you should see an output like the following:
+
+```
+pyfix version 0.1.3.
+
+Running 1 tests.
+--------------------------------------------------------------------------------
+Is prime should return true when prime is given:
+	number=2: passed [0 ms]
+	number=3: passed [0 ms]
+	number=5: passed [0 ms]
+	number=7: passed [0 ms]
+	number=11: passed [0 ms]
+--------------------------------------------------------------------------------
+TEST RESULTS SUMMARY
+	  5 tests executed in 0 ms
+	  0 tests failed
+ALL TESTS PASSED
+```
+
 ## Release Notes
+### Version 0.1.3 released 2012-09-18
+* Implemented enumerating fixtures like `enumerate`
+
 ### Version 0.1.2 released 2012-09-17
 * Renamed `main` to `run_tests`
 
@@ -130,3 +186,8 @@ if __name__ == "__main__":
 
 ## License
 pyfix is published under the terms of the [Apache License, Version 2](http://www.apache.org/licenses/LICENSE-2.0.html).
+
+## Additional Links
+* [pyfix on Cheesshop](http://pypi.python.org/pypi/pyfix)
+* [pyassert](https://github.com/pyclectic/pyassert) - used for all unit tests in *pyfix* as well as in all examples
+* [pybuilder](https://github.com/pybuilder/pybuilder) - used to "build" *pyfix*
