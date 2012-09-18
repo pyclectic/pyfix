@@ -91,6 +91,7 @@ nothing special about the `Accumulator`; it's a plain Python class.
 If you want to do some complex initialization and/ or clean up stuff, pyfix provides the `Fixture` interface which
 defines hooks for these lifecycle phases.
 
+```python
 from pyfix import test, run_tests, given, Fixture
 from pyassert import assert_that
 
