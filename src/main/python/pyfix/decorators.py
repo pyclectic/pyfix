@@ -17,8 +17,8 @@ def test (function):
     return function
 
 
-def given (**fixtureDemands):
-    if len(fixtureDemands) == 0:
+def given (**fixture_demands):
+    if len(fixture_demands) == 0:
         raise ValueError("No fixtures given.")
 
     def mark_demands (function):
@@ -26,12 +26,12 @@ def given (**fixtureDemands):
         if hasattr(function, GIVEN_ATTRIBUTE):
             givens = getattr(function, GIVEN_ATTRIBUTE)
 
-        for name in fixtureDemands:
+        for name in fixture_demands:
             if name in givens:
                 raise ValueError(
                     _DUPLICATE_FIXTURE_NAME_PATTERN.format(
-                        name, fixtureDemands[name], givens[name]))
-            givens[name] = fixtureDemands[name]
+                        name, fixture_demands[name], givens[name]))
+            givens[name] = fixture_demands[name]
 
         setattr(function, GIVEN_ATTRIBUTE, givens)
 
