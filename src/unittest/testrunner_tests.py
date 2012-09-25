@@ -132,7 +132,7 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(actual[0].success).is_true()
         assert_that(actual[0].parameter_description).equals("")
 
-    def test_ensure_that_test_is_marked_as_failing_when_being_executed_with_exception (self):
+    def test_ensure_that_test_is_marked_as_failing_when_being_executed_with_an_assertion_error (self):
         function = InvocationCountingFunctionMock(AssertionError("Caboom"))
         test_definition = TestDefinition(function, "unittest", "unittest", "module", {})
 
@@ -140,6 +140,15 @@ class TestInjectorTest (unittest.TestCase):
 
         assert_that(actual[0].success).is_false()
         assert_that(actual[0].message).equals("Caboom")
+
+    def test_ensure_that_test_is_marked_as_failing_and_exception_type_in_message_when_some_exception_raised (self):
+        function = InvocationCountingFunctionMock(Exception("Caboom"))
+        test_definition = TestDefinition(function, "unittest", "unittest", "module", {})
+
+        actual = self.injector.execute_test(test_definition)
+
+        assert_that(actual[0].success).is_false()
+        assert_that(actual[0].message).equals("Exception: Caboom")
 
     def test_should_invoke_test_function_once_when_no_givens_are_set (self):
         function = InvocationCountingFunctionMock()

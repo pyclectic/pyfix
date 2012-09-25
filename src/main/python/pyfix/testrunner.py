@@ -107,6 +107,18 @@ class TestInjector(object):
 
         return (given_value, given_value.provide())
 
+
+    def _get_exception_information(self):
+        exception_information = sys.exc_info()
+        type_name = exception_information[0].__name__
+        
+        message = ""
+        if type_name != "AssertionError":
+            message += type_name + ": "
+        
+        message += str(exception_information[1])
+        return message
+
     def _execute_test_once(self, test_definition, fixtures, parameters):
         start = time.time()
 
@@ -116,7 +128,7 @@ class TestInjector(object):
         try:
             test_definition.function(**parameters)
         except:
-            message = str(sys.exc_info()[1])
+            message = self._get_exception_information()
             success = False
 
         end = time.time()
