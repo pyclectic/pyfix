@@ -246,4 +246,3 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(results[0].success).is_false()
         assert_that(results[0].traceback).is_not_none()
         assert_that(results[0].traceback_as_string).matches(".*")
-        print results[0].traceback_as_string
