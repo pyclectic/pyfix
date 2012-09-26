@@ -12,25 +12,38 @@ from pyfix import __version__
 from .testcollector import TestCollector
 from .testrunner import TestRunListener, TestRunner
 
-def red (message):
+def red(message):
     if sys.stdout.isatty():
         return "\033[31m%s\033[0;0m" % message
     return message
 
 
-def green (message):
+def green(message):
     if sys.stdout.isatty():
         return "\033[32m%s\033[0;0m" % message
     return message
 
 
+def bold(message):
+    if sys.stdout.isatty():
+        return "\033[1m%s\033[0;0m" % message
+    return message
+
+
 class TtyTestRunListener(TestRunListener):
-    def before_test (self, test_definition):
-        sys.stdout.write("{0}: ".format(test_definition.name))
+    def __init__ (self):
+        self._test_written = False
+
+    def before_test(self, test_definition):
+        if self._test_written:
+            self._hr()
+
+        sys.stdout.write("{0}: ".format(bold(test_definition.name)))
         sys.stdout.flush()
 
-    def after_test (self, test_results):
+    def after_test(self, test_results):
         for test_result in test_results:
+            self._test_written = True
             sys.stdout.write("\n\t")
             if test_result.parameter_description:
                 sys.stdout.write("{0}: ".format(test_result.parameter_description))
@@ -45,28 +58,32 @@ class TtyTestRunListener(TestRunListener):
                 sys.stdout.write("\n{0}".format(test_result.traceback_as_string))
         sys.stdout.write("\n")
 
-    def before_suite (self, test_definitions):
+
+    def before_suite(self, test_definitions):
         number_of_tests = len(test_definitions)
         print("Running {0} test{1}.".format(number_of_tests, "s" if number_of_tests else ""))
-        self._hr()
+        self._bold_hr()
 
-    def after_suite (self, test_suite_result):
-        self._hr()
+    def after_suite(self, test_suite_result):
+        self._bold_hr()
         print("TEST RESULTS SUMMARY")
         print("\t{0:3d} tests executed in {1:d} ms".format(test_suite_result.number_of_tests_executed,
             test_suite_result.execution_time))
         print("\t{0:3d} tests failed".format(test_suite_result.number_of_failures))
 
-    def _hr (self):
+    def _bold_hr(self):
+        print("=" * 80)
+
+    def _hr(self):
         print("-" * 80)
 
 
-def banner ():
+def banner():
     print("pyfix version {0}.".format(__version__))
     print()
 
 
-def run_tests ():
+def run_tests():
     """
     Main cli function. Executes all tests defined in the __main__ module and issues all reports to STDOUT using
     tty coloring if supported by STDOUT.

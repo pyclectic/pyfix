@@ -9,7 +9,7 @@ from pyfix.fixture import Fixture, enumerate
 from pyfix.testrunner import TestRunner, TestRunListener, TestResult, TestSuiteResult, TestInjector
 
 class TestRunnerNotificationTest(unittest.TestCase):
-    def setUp (self):
+    def setUp(self):
         self.listener_mock = mock(TestRunListener)
         self.test_definition_mock = mock(TestDefinition)
         self.test_definition_mock.givens = {}
@@ -23,19 +23,19 @@ class TestRunnerNotificationTest(unittest.TestCase):
         self.test_runner._injector = self.injector_mock
         self.test_runner.add_test_run_listener(self.listener_mock)
 
-    def test_ensure_that_before_suite_is_called (self):
+    def test_ensure_that_before_suite_is_called(self):
         self.test_runner.run_tests(self.suite)
         verify(self.listener_mock).before_suite(self.suite)
 
-    def test_ensure_that_before_test_is_called (self):
+    def test_ensure_that_before_test_is_called(self):
         self.test_runner.run_tests(self.suite)
         verify(self.listener_mock).before_test(self.test_definition_mock)
 
-    def test_ensure_that_after_test_is_called (self):
+    def test_ensure_that_after_test_is_called(self):
         self.test_runner.run_tests(self.suite)
         verify(self.listener_mock).after_test(any_value(list))
 
-    def test_ensure_that_after_suite_is_called (self):
+    def test_ensure_that_after_suite_is_called(self):
         self.test_runner.run_tests(self.suite)
         verify(self.listener_mock).after_suite(any_value(TestSuiteResult))
 
@@ -47,7 +47,7 @@ class TestRunnerExecutionTest(unittest.TestCase):
         self.test_runner = TestRunner()
         self.test_runner._injector = self.injector_mock
 
-    def test_should_execute_test_function_when_running_test (self):
+    def test_should_execute_test_function_when_running_test(self):
         test_definition_mock = mock(TestDefinition)
         when(self.injector_mock).execute_test(test_definition_mock).thenReturn(mock(TestResult))
 
@@ -56,28 +56,28 @@ class TestRunnerExecutionTest(unittest.TestCase):
         when(self.injector_mock).execute_test(test_definition_mock)
 
 
-class TestSuiteResultsTest (unittest.TestCase):
-    def setUp (self):
+class TestSuiteResultsTest(unittest.TestCase):
+    def setUp(self):
         self.test_suite = TestSuiteResult()
 
-    def test_should_return_success_when_no_test_has_been_recorded (self):
+    def test_should_return_success_when_no_test_has_been_recorded(self):
         assert_that(self.test_suite.success).is_true()
 
-    def test_should_return_success_when_single_test_has_been_recorded (self):
+    def test_should_return_success_when_single_test_has_been_recorded(self):
         result = mock(TestResult)
         result.success = True
         self.test_suite.add_test_results([result])
 
         assert_that(self.test_suite.success).is_true()
 
-    def test_should_return_no_success_when_single_test_with_failure_has_been_recorded (self):
+    def test_should_return_no_success_when_single_test_with_failure_has_been_recorded(self):
         result = mock(TestResult)
         result.success = False
         self.test_suite.add_test_results([result])
 
         assert_that(self.test_suite.success).is_false()
 
-    def test_should_count_number_of_tests_executed (self):
+    def test_should_count_number_of_tests_executed(self):
         failure = mock(TestResult)
         failure.success = False
 
@@ -88,7 +88,7 @@ class TestSuiteResultsTest (unittest.TestCase):
 
         assert_that(self.test_suite.number_of_tests_executed).equals(4)
 
-    def test_should_count_number_of_failures (self):
+    def test_should_count_number_of_failures(self):
         failure = mock(TestResult)
         failure.success = False
 
@@ -100,30 +100,30 @@ class TestSuiteResultsTest (unittest.TestCase):
         assert_that(self.test_suite.number_of_failures).equals(2)
 
 
-class InvocationCountingFunctionMock (object):
-    def __init__ (self, exception_to_raise=None):
+class InvocationCountingFunctionMock(object):
+    def __init__(self, exception_to_raise=None):
         self._exception_to_raise = exception_to_raise
         self._invocation_arguments = []
 
     @property
-    def invocation_counter (self):
+    def invocation_counter(self):
         return len(self._invocation_arguments)
 
     @property
-    def invocation_arguments (self):
+    def invocation_arguments(self):
         return self._invocation_arguments
 
-    def __call__ (self, **arguments):
+    def __call__(self, **arguments):
         self._invocation_arguments.append(arguments)
         if self._exception_to_raise is not None:
             raise self._exception_to_raise
 
 
-class TestInjectorTest (unittest.TestCase):
-    def setUp (self):
+class TestInjectorTest(unittest.TestCase):
+    def setUp(self):
         self.injector = TestInjector()
 
-    def test_ensure_that_test_is_marked_as_successful_when_being_executed_without_exception (self):
+    def test_ensure_that_test_is_marked_as_successful_when_being_executed_without_exception(self):
         function = InvocationCountingFunctionMock()
         test_definition = TestDefinition(function, "unittest", "unittest", "module", {})
 
@@ -132,7 +132,7 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(actual[0].success).is_true()
         assert_that(actual[0].parameter_description).equals("")
 
-    def test_ensure_that_test_is_marked_as_failing_when_being_executed_with_an_assertion_error (self):
+    def test_ensure_that_test_is_marked_as_failing_when_being_executed_with_an_assertion_error(self):
         function = InvocationCountingFunctionMock(AssertionError("Caboom"))
         test_definition = TestDefinition(function, "unittest", "unittest", "module", {})
 
@@ -141,7 +141,7 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(actual[0].success).is_false()
         assert_that(actual[0].message).equals("Caboom")
 
-    def test_ensure_that_test_is_marked_as_failing_and_exception_type_in_message_when_some_exception_raised (self):
+    def test_ensure_that_test_is_marked_as_failing_and_exception_type_in_message_when_some_exception_raised(self):
         function = InvocationCountingFunctionMock(Exception("Caboom"))
         test_definition = TestDefinition(function, "unittest", "unittest", "module", {})
 
@@ -150,7 +150,7 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(actual[0].success).is_false()
         assert_that(actual[0].message).equals("Exception: Caboom")
 
-    def test_should_invoke_test_function_once_when_no_givens_are_set (self):
+    def test_should_invoke_test_function_once_when_no_givens_are_set(self):
         function = InvocationCountingFunctionMock()
         test_definition = TestDefinition(function, "unittest", "unittest", "module", {})
 
@@ -159,7 +159,7 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(function.invocation_counter).equals(1)
         assert_that(function.invocation_arguments[0]).equals({})
 
-    def test_should_invoke_test_function_once_when_constant_given_is_set (self):
+    def test_should_invoke_test_function_once_when_constant_given_is_set(self):
         function = InvocationCountingFunctionMock()
         test_definition = TestDefinition(function, "unittest", "unittest", "module", {"spam": "eggs"})
 
@@ -169,8 +169,8 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(function.invocation_arguments[0]).equals({"spam": "eggs"})
         assert_that(result[0].parameter_description).equals("spam=eggs")
 
-    def test_should_invoke_test_function_once_when_fixture_is_given_and_provide_and_reclaim_are_called (self):
-        class TestFixture (Fixture):
+    def test_should_invoke_test_function_once_when_fixture_is_given_and_provide_and_reclaim_are_called(self):
+        class TestFixture(Fixture):
             provide_invoked = False
             reclaim_invoked = False
 
@@ -193,16 +193,17 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(TestFixture.provide_invoked).is_true()
         assert_that(TestFixture.reclaim_invoked).is_true()
 
-    def test_should_invoke_test_function_twice_when_fixture_provides_two_values (self):
+    def test_should_invoke_test_function_twice_when_fixture_provides_two_values(self):
         function = InvocationCountingFunctionMock()
-        test_definition = TestDefinition(function, "unittest", "unittest", "module", {"spam": enumerate("spam", "eggs")})
+        test_definition = TestDefinition(function, "unittest", "unittest", "module",
+                {"spam": enumerate("spam", "eggs")})
 
         self.injector.execute_test(test_definition)
 
         assert_that(function.invocation_counter).equals(2)
 
-    def test_should_reclaim_all_values_when_fixture_returns_more_than_one_value (self):
-        class TestFixture (Fixture):
+    def test_should_reclaim_all_values_when_fixture_returns_more_than_one_value(self):
+        class TestFixture(Fixture):
             provide_invoked = 0
             reclaim_invoked = 0
 
@@ -221,7 +222,7 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(TestFixture.provide_invoked).equals(1)
         assert_that(TestFixture.reclaim_invoked).equals(2)
 
-    def test_should_invoke_test_function_four_times_when_two_fixtures_each_provide_two_values (self):
+    def test_should_invoke_test_function_four_times_when_two_fixtures_each_provide_two_values(self):
         function = InvocationCountingFunctionMock()
         test_definition = TestDefinition(function, "unittest", "unittest", "module",
                 {"spam": enumerate("spam", "eggs"),
@@ -235,9 +236,10 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(function.invocation_arguments).contains({"spam": "eggs", "foo": "foo"})
         assert_that(function.invocation_arguments).contains({"spam": "eggs", "foo": "bar"})
 
-    def test_should_collect_traceback_when_test_function_raises_an_exception (self):
-        def test_function ():
+    def test_should_collect_traceback_when_test_function_raises_an_exception(self):
+        def test_function():
             raise Exception("Caboom")
+
         test_definition = TestDefinition(test_function, "unittest", "unittest", "module", {})
 
         results = self.injector.execute_test(test_definition)
@@ -246,3 +248,57 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(results[0].success).is_false()
         assert_that(results[0].traceback).is_not_none()
         assert_that(results[0].traceback_as_string).matches(".*")
+
+
+class TestInjectorInterceptorsTest(unittest.TestCase):
+    def setUp(self):
+        def test(): pass
+
+        self.test_definition = TestDefinition(test, "unittest", "unittest", "unittest", {})
+        self.injector = TestInjector()
+
+    def test_should_execute_before_interceptor(self):
+        def before():
+            before.executed = True
+
+        before.executed = False
+        self.test_definition.before_interceptors.append(before)
+
+        self.injector.execute_test(self.test_definition)
+
+        assert_that(before.executed).is_true()
+
+    def test_should_after_before_interceptor(self):
+        def after():
+            after.executed = True
+
+        after.executed = False
+        self.test_definition.after_interceptors.append(after)
+
+        self.injector.execute_test(self.test_definition)
+
+        assert_that(after.executed).is_true()
+
+    def test_should_mark_test_as_failed_when_before_interceptor_raises_exception(self):
+        def before():
+            raise Exception("Caboom")
+
+        self.test_definition.before_interceptors.append(before)
+
+        results = self.injector.execute_test(self.test_definition)
+
+        assert_that(len(results)).is_equal_to(1)
+        assert_that(results[0].success).is_false()
+        assert_that(results[0].message).is_equal_to("Execution of before interceptor failed: Exception: Caboom")
+
+    def test_should_mark_test_as_failed_when_after_interceptor_raises_exception(self):
+        def after():
+            raise Exception("Caboom")
+
+        self.test_definition.after_interceptors.append(after)
+
+        results = self.injector.execute_test(self.test_definition)
+
+        assert_that(len(results)).is_equal_to(1)
+        assert_that(results[0].success).is_false()
+        assert_that(results[0].message).is_equal_to("Execution of after interceptor failed: Exception: Caboom")

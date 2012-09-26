@@ -4,7 +4,7 @@ import unittest
 from mockito import mock
 from pyassert import assert_that
 
-from pyfix.decorators import test, given
+from pyfix.decorators import test
 from pyfix.testcollector import TestCollector
 
 class TestCollectorTest(unittest.TestCase):

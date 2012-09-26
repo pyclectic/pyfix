@@ -4,6 +4,8 @@ Provides some utility functions and classes.
 
 __author__ = "Alexander Metzner"
 
+import types
+
 def humanize_underscore_name (function_name):
     if "_" in function_name:
         return function_name.replace("_", " ").capitalize()
@@ -27,3 +29,6 @@ def _de_camel_case (name):
         result = result[1:]
     return result.capitalize()
 
+
+def is_callable (candidate):
+    return isinstance(candidate, types.FunctionType) or hasattr(candidate, "__call__")

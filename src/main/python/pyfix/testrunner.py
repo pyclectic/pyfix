@@ -54,7 +54,7 @@ class TestResult(object):
         self.traceback = traceback
 
     @property
-    def traceback_as_string (self):
+    def traceback_as_string(self):
         return "\n".join(traceback.format_tb(self.traceback))
 
 
@@ -150,6 +150,10 @@ class TestInjector(object):
         value = str(exception_information[1])
         return type_name + ": " + value, exception_information[2]
 
+    def _execute_interceptors(self, interceptors):
+        for interceptor in interceptors:
+            interceptor()
+
     def _execute_test_once(self, test_definition, fixtures, parameters):
         start = time.time()
 
@@ -158,12 +162,28 @@ class TestInjector(object):
         success = False
 
         try:
-            test_definition.function(**parameters)
-            success = True
-        except AssertionError as error:
-            message = str(error)
+            self._execute_interceptors(test_definition.before_interceptors)
+
+            try:
+                test_definition.function(**parameters)
+                success = True
+            except AssertionError as error:
+                message = str(error)
+            except:
+                message, traceback = self._get_exception_information()
+
         except:
             message, traceback = self._get_exception_information()
+            message = "Execution of before interceptor failed: " + message
+            success = False
+
+        finally:
+            try:
+                self._execute_interceptors(test_definition.after_interceptors)
+            except:
+                message, traceback = self._get_exception_information()
+                message = "Execution of after interceptor failed: " + message
+                success = False
 
         end = time.time()
 
