@@ -174,7 +174,42 @@ TEST RESULTS SUMMARY
 ALL TESTS PASSED
 ```
 
+### Interceptors - Executing Code before and/ or after a test function
+If you want to execute any code before or after a test function you can register an interceptor to do so:
+
+```python
+__author__ = "Alexander Metzner"
+
+from pyassert import assert_that
+from pyfix import test, before, after, run_tests
+
+def before_interceptor():
+    print "Starting test..."
+
+
+def after_interceptor():
+    print "Test stopped."
+
+
+@test
+@before(before_interceptor)
+@after(after_interceptor)
+def ensure_that_before_interceptor_is_executed():
+    assert_that(_BEFORE_EXECUTED).is_true()
+
+
+if __name__ == "__main__":
+    run_tests()
+```
+
+You can register as many before/ after interceptors as you want using multiple decorators or passing more than one
+value to a decorator.
+
 ## Release Notes
+### Version 0.2.0 released 2012-09-26
+* Implemented `before` and `after` decorators
+* Test results contain a traceback in case of an exception
+
 ### Version 0.1.3 released 2012-09-18
 * Implemented enumerating fixtures like `enumerate`
 
