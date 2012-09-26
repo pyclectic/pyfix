@@ -41,6 +41,8 @@ class TtyTestRunListener(TestRunListener):
             sys.stdout.write(" [{0:d} ms]".format(test_result.execution_time))
             if not test_result.success:
                 sys.stdout.write(" {0}".format(test_result.message))
+            if test_result.traceback:
+                sys.stdout.write("\n{0}".format(test_result.traceback_as_string))
         sys.stdout.write("\n")
 
     def before_suite (self, test_definitions):
@@ -48,12 +50,12 @@ class TtyTestRunListener(TestRunListener):
         print("Running {0} test{1}.".format(number_of_tests, "s" if number_of_tests else ""))
         self._hr()
 
-    def after_suite (self, test_results):
+    def after_suite (self, test_suite_result):
         self._hr()
         print("TEST RESULTS SUMMARY")
-        print("\t{0:3d} tests executed in {1:d} ms".format(test_results.number_of_tests_executed,
-            test_results.execution_time))
-        print("\t{0:3d} tests failed".format(test_results.number_of_failures))
+        print("\t{0:3d} tests executed in {1:d} ms".format(test_suite_result.number_of_tests_executed,
+            test_suite_result.execution_time))
+        print("\t{0:3d} tests failed".format(test_suite_result.number_of_failures))
 
     def _hr (self):
         print("-" * 80)

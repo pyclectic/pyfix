@@ -234,3 +234,16 @@ class TestInjectorTest (unittest.TestCase):
         assert_that(function.invocation_arguments).contains({"spam": "spam", "foo": "bar"})
         assert_that(function.invocation_arguments).contains({"spam": "eggs", "foo": "foo"})
         assert_that(function.invocation_arguments).contains({"spam": "eggs", "foo": "bar"})
+
+    def test_should_collect_traceback_when_test_function_raises_an_exception (self):
+        def test_function ():
+            raise Exception("Caboom")
+        test_definition = TestDefinition(test_function, "unittest", "unittest", "module", {})
+
+        results = self.injector.execute_test(test_definition)
+
+        assert_that(len(results)).is_equal_to(1)
+        assert_that(results[0].success).is_false()
+        assert_that(results[0].traceback).is_not_none()
+        assert_that(results[0].traceback_as_string).matches(".*")
+        print results[0].traceback_as_string

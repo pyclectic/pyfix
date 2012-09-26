@@ -4,33 +4,63 @@ import copy
 import inspect
 import sys
 import time
+import traceback
 
 from .fixture import Fixture, ConstantFixture
 
 class TestRunListener(object):
+    """
+    Interface class for listeners that can be registered with a TestRunner to receive notifications about events
+    that occurred during execution of tests.
+    """
+
     def before_suite(self, test_definitions):
+        "Called before the execution of the test suite starts. Receives the list of all TestDefinitions to execute."
         pass
 
     def before_test(self, test_definition):
+        "Called before the given TestDefinition is executed."
         pass
 
     def after_test(self, test_results):
+        """
+        Called after a single test definition has been executed. As a single test definition can spawn several test
+        executions a list of TestResults is passed in.
+        """
         pass
 
-    def after_suite(self, test_results):
+    def after_suite(self, test_suite_result):
+        "Called after the suite has been executed. The TestSuiteResult is passed in."
         pass
 
 
 class TestResult(object):
-    def __init__(self, test_definition, success, execution_time, message, parameter_description):
+    "The result of a single test execution."
+
+    def __init__(self, test_definition, success, execution_time, parameter_description, message, traceback):
+        """
+        test_definition -- the TestDefinition that has been executed
+        success -- True if the execution was successfull, False otherwise
+        execution_time -- Time in milli seconds it took to execute the test
+        parameter_description -- String that describes the parameter that have been used for this execution
+        message -- Message describing the failure
+        traceback -- Traceback in case of a failure or None
+        """
         self.test_definition = test_definition
         self.success = success
         self.execution_time = execution_time
-        self.message = message
         self.parameter_description = parameter_description
+        self.message = message
+        self.traceback = traceback
+
+    @property
+    def traceback_as_string (self):
+        return "\n".join(traceback.format_tb(self.traceback))
 
 
 class TestSuiteResult(object):
+    "The result of an execution of a test suite a.k.a. a list of test definitions."
+
     def __init__(self):
         self.test_results = []
         self.execution_time = -1
@@ -55,7 +85,13 @@ class TestSuiteResult(object):
 
 
 class TestInjector(object):
+    """
+    Instances of this class are used to calculate parameter values from TestDefinitions and execute the test function
+    with the respective arguments.
+    """
+
     def execute_test(self, test_definition):
+        "Executes the given TestDefinition and returns a list of TestResults; one result for each execution."
         results = []
 
         fixtures = self._resolve_fixtures(test_definition)
@@ -110,31 +146,31 @@ class TestInjector(object):
 
     def _get_exception_information(self):
         exception_information = sys.exc_info()
-        type_name = exception_information[0].__name__        
+        type_name = exception_information[0].__name__
         value = str(exception_information[1])
-        return type_name + ": " + value
+        return type_name + ": " + value, exception_information[2]
 
     def _execute_test_once(self, test_definition, fixtures, parameters):
         start = time.time()
 
         message = None
-        success = True
+        traceback = None
+        success = False
 
         try:
             test_definition.function(**parameters)
+            success = True
         except AssertionError as error:
             message = str(error)
-            success = False
         except:
-            message = self._get_exception_information()
-            success = False
+            message, traceback = self._get_exception_information()
 
         end = time.time()
 
-        return TestResult(test_definition, success, int((end - start) * 1000), message,
-            self._build_parameter_description(fixtures, parameters))
+        return TestResult(test_definition, success, int((end - start) * 1000),
+            self._build_parameter_description(fixtures, parameters), message, traceback)
 
-    def _build_parameter_description (self, fixtures, parameters):
+    def _build_parameter_description(self, fixtures, parameters):
         result_list = []
         for name in sorted(fixtures.keys()):
             result_list.append("{0}={1}".format(name, fixtures[name][0].describe(parameters[name])))
@@ -143,14 +179,23 @@ class TestInjector(object):
 
 
 class TestRunner(object):
+    """
+    Runner that executes tests and test suites.
+
+    Multiple TestRunListener can be registered with a test runner to receive notifications about events during
+    execution.
+    """
+
     def __init__(self):
         self._injector = TestInjector()
         self._listeners = []
 
     def add_test_run_listener(self, test_run_listener):
+        "Registers the given TestRunListener."
         self._listeners.append(test_run_listener)
 
     def run_tests(self, test_definitions):
+        "Executes all given TestDefinitions and returns a TestSuiteResult."
         test_suite_result = TestSuiteResult()
         self._notify_listeners(lambda l: l.before_suite(test_definitions))
 
@@ -167,6 +212,7 @@ class TestRunner(object):
         return test_suite_result
 
     def run_test(self, test_definition):
+        "Executes a single TestDefinition and returns a list of TestResults."
         self._notify_listeners(lambda l: l.before_test(test_definition))
 
         test_results = self._injector.execute_test(test_definition)
