@@ -21,6 +21,12 @@ import shutil
 
 from pyfix import Fixture
 
+# Python 3 compatibility
+try:
+    unicode
+except NameError:
+    basestring = unicode = str
+
 class TemporaryDirectoryHandle(object):
     """
     Handle for working in a temporary directory.
