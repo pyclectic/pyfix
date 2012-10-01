@@ -22,8 +22,6 @@ AFTER_ATTRIBUTE = "pyfix_after"
 
 _DUPLICATE_FIXTURE_NAME_PATTERN = "Unable to define fixture with name '{0}' and value '{1}' because it is already given with value '{2}'"
 
-from .utils import is_callable
-
 def test(function):
     """
     Marks a function as a test:
@@ -76,7 +74,7 @@ def given(**fixture_demands):
 
 def _add_interceptors(function, attribute_name, interceptors):
     for interceptor in interceptors:
-        if not is_callable(interceptor):
+        if not callable(interceptor):
             raise ValueError("Interceptor '{0}' is not callable".format(interceptor))
 
     registered_interceptors = []
