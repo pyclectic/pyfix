@@ -206,6 +206,10 @@ You can register as many before/ after interceptors as you want using multiple d
 value to a decorator.
 
 ## Release Notes
+
+### Version 0.2.3 released 2012-10-01
+* Added temporary directory fixture
+
 ### Version 0.2.0 released 2012-09-26
 * Implemented `before` and `after` decorators
 * Test results contain a traceback in case of an exception
