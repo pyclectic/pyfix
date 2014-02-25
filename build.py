@@ -33,7 +33,7 @@ Links
 * pyfix Github repository <https://github.com/pyclectic/pyfix>
 """
 
-from pythonbuilder.core import init, use_plugin, Author
+from pybuilder.core import init, use_plugin, Author
 
 use_plugin("filter_resources")
 
